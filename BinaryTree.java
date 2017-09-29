@@ -24,24 +24,6 @@ public class BinaryTree<T extends Comparable<T>> {
 
     }
 
-    public static void main(String... args) {
-
-        BinaryTree<Integer> tree = new BinaryTree<>();
-        for (int i = 0; i < 10; i++) {
-            tree.add((int) (Math.random() * 100));
-
-        }
-
-        tree.balanceTree();
-        System.out.println("root: " + tree.root);
-        List<TreeNode<Integer>> listTree = tree.getInOrderList(tree.root);
-
-        for (TreeNode node : listTree) {
-            int i = tree.getDepth(node);
-            System.out.println("depth of " + node.toString() + " is " + i);
-        }
-    }
-
     public void add(T element) {
         addNode(root, new TreeNode(element));
     }
@@ -64,15 +46,96 @@ public class BinaryTree<T extends Comparable<T>> {
         }
     }
 
+    private List<TreeNode<T>> leftList = new LinkedList<>();
+    private List<TreeNode<T>> rightList = new LinkedList<>();
+
+    public static void main(String... args) {
+        TreeNode<Integer> node = new TreeNode<>(3);
+
+        BinaryTree<Integer> tree = new BinaryTree<>(node);
+        for (int i = 0; i < 50; i++) {
+            tree.add((int) (Math.random() * 100));
+        }
+        /*
+        tree.root.leftChild = new TreeNode<>(5);
+        tree.root.leftChild.leftChild = new TreeNode<>(6);
+        tree.root.leftChild.leftChild.leftChild = new TreeNode<>(7);
+        tree.root.leftChild.leftChild.leftChild.leftChild = new TreeNode<>(8);
+        tree.root.leftChild.leftChild.leftChild.leftChild.leftChild = new TreeNode<>(9);
+        tree.root.leftChild.leftChild.leftChild.leftChild.leftChild.leftChild = new TreeNode<>(10);
+        tree.root.leftChild.leftChild.leftChild.leftChild.leftChild.leftChild.leftChild = new TreeNode<>(20);
+        */
+
+        int depth = tree.getDepth(tree.root.leftChild);
+        System.out.println("Left tree Depth = " + depth);
+
+
+        depth = tree.getDepth(tree.root.rightChild);
+        System.out.println("Right tree Depth = " + depth);
+        depth = tree.getDepth(tree.root);
+        System.out.println("Depth = " + depth);
+        tree.balanceTree();
+        depth = tree.getDepth(tree.root);
+        System.out.println("Depth = " + depth);
+
+        depth = tree.getDepth(tree.root.leftChild);
+        System.out.println("Left tree Depth = " + depth);
+
+
+        depth = tree.getDepth(tree.root.rightChild);
+        System.out.println("Right tree Depth = " + depth);
+
+    }
+
     private void balanceTree() {
+        treeList.clear();
         treeList = getInOrderList(root);
         root = null;
-        int middle = 0;
-        while (treeList.size() != 0) {
-            middle = treeList.size() / 2;
-            TreeNode<T> node = treeList.remove(middle);
-            this.add(node.element);
+        int middle = (treeList.size() / 2);
+
+        splitList(middle);
+        // if (leftList.size() > rightList.size()) {
+        // System.out.println("Root Node: " + leftList.get(leftList.size() - 1));
+        // this.add(leftList.remove(leftList.size() - 1).element);
+        //} else {
+        System.out.println("Root Node: " + rightList.get(0));
+        this.add(rightList.remove(0).element);
+        //}
+        int leftMiddle = 0;
+        int rightMiddle = 0;
+        while (leftList.size() != 0 || rightList.size() != 0) {
+            if (((leftList.size() / 2) - 1) >= 0) {
+                leftMiddle = Math.round((leftList.size() / 2) - 1);
+            } else {
+                leftMiddle = Math.round(leftList.size() / 2);
+            }
+            if (((rightList.size() / 2) - 1) >= 0) {
+                rightMiddle = Math.round((rightList.size() / 2) - 1);
+            } else {
+                rightMiddle = Math.round(rightList.size() / 2);
+            }
+            if (leftList.size() != 0) {
+                System.out.println("Node: " + leftList.get(leftMiddle) + " Added");
+                this.add(leftList.remove(leftMiddle).element);
+            }
+            if (rightList.size() != 0) {
+                System.out.println("Node: " + rightList.get(rightMiddle) + " Added");
+                this.add(rightList.remove(rightMiddle).element);
+            }
+
         }
+    }
+
+    private void splitList(int middle) {
+        for (int i = 0; i < middle; i++) {
+            System.out.println("Added to left list " + treeList.get(i));
+            leftList.add(treeList.get(i));
+        }
+        for (int i = middle; i < treeList.size(); i++) {
+            System.out.println("Added to right list " + treeList.get(i));
+            rightList.add(treeList.get(i));
+        }
+
     }
 
     public int getDepth(TreeNode root) {
@@ -81,23 +144,11 @@ public class BinaryTree<T extends Comparable<T>> {
         int leftDepth = getDepth(root.leftChild);
         int rightDepth = getDepth(root.rightChild);
 
-        if (root.leftChild != null) {
-            return 1 + rightDepth;
+        if (leftDepth > rightDepth) {
+            return leftDepth + 1;
+        } else {
+            return rightDepth + 1;
         }
-        if (root.rightChild != null) {
-            return 1 + leftDepth;
-        }
-        return 1 + Math.min(leftDepth, rightDepth);
-    }
-
-    public List<TreeNode<T>> getInOrderList(TreeNode root) {
-
-        if (root != null) {
-            getInOrderList(root.leftChild);
-            treeList.add(root);
-            getInOrderList(root.rightChild);
-        }
-        return treeList;
     }
 
     public void reverseInOrder(TreeNode root) {
@@ -123,6 +174,16 @@ public class BinaryTree<T extends Comparable<T>> {
         public String toString() {
             return element.toString();
         }
+    }
+
+    public List<TreeNode<T>> getInOrderList(TreeNode root) {
+        if (root != null) {
+            getInOrderList(root.leftChild);
+            // System.out.println(root);
+            treeList.add(root);
+            getInOrderList(root.rightChild);
+        }
+        return treeList;
     }
 }
 
